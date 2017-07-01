@@ -1,13 +1,17 @@
 import time
-
 import RPi.GPIO as GPIO
+import ConfigParser
 
+
+Config = ConfigParser.ConfigParser()
+Config.read("sonar.ini")
+MAX_DISTANCE = int(Config.get("Sonar", "distance"))
 TRIG = 23
 ECHO = 24
 
 
 if __name__ == "__main__":
-    print "Start sonar GPIO"
+    print "Start sonar GPIO with max distance to {}".format(MAX_DISTANCE)
     while True:
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(TRIG, GPIO.OUT)
@@ -26,7 +30,7 @@ if __name__ == "__main__":
         distance = pulse_duration * 17150
         distance = round(distance, 2)
 
-        if distance < 150:
+        if distance < MAX_DISTANCE:
             print "Alert something at distance: {} cm".format(distance)
         else:
             print "all is safe"
