@@ -1,9 +1,9 @@
-import time
-import RPi.GPIO as GPIO
 import ConfigParser
+import time
+
+import RPi.GPIO as GPIO
 
 from send_email import Email
-
 
 Config = ConfigParser.ConfigParser()
 Config.read("sonar.ini")
@@ -29,7 +29,8 @@ if __name__ == "__main__":
     email_to = Config.get("Email", "email_from")
     print "Start sonar GPIO with max distance to {}".format(MAX_DISTANCE)
     print "Email to {}".format(email_to)
-    email = Email('Alert', Config.get("Email", "email_from"), email_to, Config.get("Email", "smtp"))
+    email = Email('Alert', Config.get("Email", "email_from"), email_to, Config.get("Email", "smtp"),
+                  Config.get("Email", "password"))
     count_alert = 0
     while True:
         set_gpio()
