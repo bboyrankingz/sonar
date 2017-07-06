@@ -1,6 +1,6 @@
 import ConfigParser
 import time
-
+import subprocess
 import RPi.GPIO as GPIO
 
 from send_email import Email
@@ -12,6 +12,14 @@ TRIG = 23
 ECHO = 24
 SOUND_SPEED = 34300
 MAX_ALERT = 3
+MAX_SPAM = int(Config.get("Sonar", "max_spam"))
+
+
+def shutdown():
+    command = "/usr/bin/sudo /sbin/shutdown -h now"
+    process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+    output = process.communicate()[0]
+    print output
 
 
 def set_gpio():
@@ -32,6 +40,7 @@ if __name__ == "__main__":
     email = Email('Alert', Config.get("Email", "email_from"), email_to, Config.get("Email", "smtp"),
                   Config.get("Email", "password"))
     count_alert = 0
+    count_spam = 0
     while True:
         set_gpio()
         while GPIO.input(ECHO) == 0:
@@ -48,7 +57,12 @@ if __name__ == "__main__":
             if count_alert >= MAX_ALERT:
                 print "Send email to: {} cm".format(email_to)
                 email.send()
+                count_spam += 1
         else:
             count_alert = 0
-            print "all is safe"
         GPIO.cleanup()
+        if count_spam > MAX_SPAM:
+            break
+
+    shutdown()
+
